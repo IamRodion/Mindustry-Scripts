@@ -1,0 +1,39 @@
+ubind @mega
+set takeFlag 1
+set dropFlag 2
+set stopFlag 3
+sensor cX container1 @x
+sensor cY container1 @y
+ulocate building core false @copper coreX coreY coreFound core
+ucontrol flag stopFlag 0 0 0 0
+sensor ammo container1 @silicon
+select skip greaterThanEq ammo 300 true false
+op sub ammoNeed 300 ammo
+sensor unitFlag @unit @flag
+select flagText equal unitFlag 1 "Take" "Idle"
+select flagText equal unitFlag 2 "Drop" flagText
+print "Ammo: {0}\nAmmo need: {1}\nUnit: {2}\nUnit State: {3} ({4})"
+format ammo
+format ammoNeed
+format @unit
+format flagText
+format unitFlag
+printflush message1
+jump 33 equal unitFlag dropFlag
+select newFlag equal skip true stopFlag takeFlag
+ucontrol flag newFlag 0 0 0 0
+jump 27 equal unitFlag takeFlag
+ucontrol stop 0 0 0 0 0
+jump 8 always x false
+ucontrol approach coreX coreY 1 0 0
+ucontrol within coreX coreY 1 nearCore 0
+jump 27 notEqual nearCore true
+ucontrol itemTake core @silicon ammoNeed 0 0
+ucontrol flag dropFlag 0 0 0 0
+jump 8 always x false
+ucontrol approach cX cY 1 0 0
+ucontrol within cX cY 1 nearContainer 0
+jump 33 notEqual nearContainer true
+ucontrol itemDrop container1 ammoNeed 0 0 0
+ucontrol flag stopFlag 0 0 0 0
+jump 8 always x false

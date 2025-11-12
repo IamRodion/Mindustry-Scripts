@@ -1,0 +1,67 @@
+ubind @poly
+set takeFlag 1
+set dropFlag 2
+set stopFlag 3
+sensor fX factory1 @x
+sensor fY factory1 @y
+ulocate building core false @copper coreX coreY coreFound core
+ucontrol flag stopFlag 0 0 0 0
+sensor unitFlag @unit @flag
+sensor factoryConfig factory1 @config
+select coalAmountConfig equal factoryConfig @crawler 10 0
+select titaniumAmountConfig equal factoryConfig @nova 20 0
+select leadAmountConfig equal factoryConfig @dagger 10 0
+select leadAmountConfig equal factoryConfig @nova 20 leadAmountConfig
+select siliconAmountConfig equal factoryConfig @dagger 10 8
+select siliconAmountConfig equal factoryConfig @nova 30 siliconAmountConfig
+sensor coalAmount factory1 @coal
+sensor titaniumAmount factory1 @titanium
+sensor leadAmount factory1 @lead
+sensor siliconAmount factory1 @silicon
+op sub coalAmountNeed coalAmountConfig coalAmount
+op sub titaniumAmountNeed titaniumAmountConfig titaniumAmount
+op sub leadAmountNeed leadAmountConfig leadAmount
+op sub siliconAmountNeed siliconAmountConfig siliconAmount
+select skipCoal greaterThanEq coalAmount coalAmountConfig true false
+select skipTitanium greaterThanEq titaniumAmount titaniumAmountConfig true false
+select skipLead greaterThanEq leadAmount leadAmountConfig true false
+select skipSilicon greaterThanEq siliconAmount siliconAmountConfig true false
+op and skipCT skipCoal skipTitanium
+op and skipSL skipSilicon skipLead
+op and skip skipCT skipSL
+select ore equal skipCoal true "nothing" @coal
+select ore equal skipTitanium true ore @titanium
+select ore equal skipLead true ore @lead
+select ore equal skipSilicon true ore @silicon
+select oreAmount equal ore @coal coalAmountNeed 0
+select oreAmount equal ore @titanium titaniumAmountNeed oreAmount
+select oreAmount equal ore @lead leadAmountNeed oreAmount
+select oreAmount equal ore @silicon siliconAmountNeed oreAmount
+select textUnitFlag equal unitFlag 1 "Take" "Idle"
+select textUnitFlag equal unitFlag 2 "Drop" textUnitFlag
+print "[orange]Unit Type:[] {0}\n[green]Unit Mode:[] {1} ({2})\n[pink]Factory Mode:[] {3}\n[red]Factory Need:[] {4} ({5})"
+format @unit
+format textUnitFlag
+format unitFlag
+format factoryConfig
+format ore
+format oreAmount
+printflush message1
+jump 61 equal unitFlag dropFlag
+select newFlag notEqual skip false 3 1
+ucontrol flag newFlag 0 0 0 0
+jump 55 equal unitFlag takeFlag
+ucontrol stop 0 0 0 0 0
+jump 8 always x false
+ucontrol approach coreX coreY 1 0 0
+ucontrol within coreX coreY 1 nearCore 0
+jump 55 equal nearCore false
+ucontrol itemTake core ore oreAmount 0 0
+ucontrol flag 2 0 0 0 0
+jump 8 always x false
+ucontrol approach fX fY 1 0 0
+ucontrol within fX fY 1 nearFactory 0
+jump 61 equal nearFactory false
+ucontrol itemDrop factory1 oreAmount 0 0 0
+ucontrol flag 3 0 0 0 0
+jump 8 always x false

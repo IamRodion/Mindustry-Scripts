@@ -1,0 +1,50 @@
+ubind @flare
+set takeFlag 1
+set dropFlag 2
+set stopFlag 3
+sensor fX factory1 @x
+sensor fY factory1 @y
+ulocate building core false @copper coreX coreY coreFound core
+ucontrol flag stopFlag 0 0 0 0
+sensor unitFlag @unit @flag
+sensor factoryConfig factory1 @config
+select siliconAmountConfig equal factoryConfig @mono 30 15
+select leadAmountConfig equal factoryConfig @mono 15 0
+sensor siliconAmount factory1 @silicon
+op sub siliconAmountNeed siliconAmountConfig siliconAmount
+sensor leadAmount factory1 @lead
+op sub leadAmountNeed leadAmountConfig leadAmount
+select skipSilicon greaterThanEq siliconAmount siliconAmountConfig true false
+select skipLead greaterThanEq leadAmount leadAmountConfig true false
+op and skip skipSilicon skipLead
+select ore equal skipSilicon true @lead @silicon
+select ore equal skip true "nothing" ore
+select oreAmount equal ore @silicon siliconAmountNeed leadAmountNeed
+select textUnitFlag equal unitFlag 1 "Take" "Idle"
+select textUnitFlag equal unitFlag 2 "Drop" textUnitFlag
+print "[orange]Unit Type:[] {0}\n[green]Unit Mode:[] {1} ({2})\n[pink]Factory Mode:[] {3}\n[red]Factory Need:[] {4} ({5})"
+format @unit
+format textUnitFlag
+format unitFlag
+format factoryConfig
+format ore
+format oreAmount
+printflush message1
+jump 44 equal unitFlag dropFlag
+select newFlag notEqual skip false 3 1
+ucontrol flag newFlag 0 0 0 0
+jump 38 equal unitFlag takeFlag
+ucontrol stop 0 0 0 0 0
+jump 8 always x false
+ucontrol approach coreX coreY 1 0 0
+ucontrol within coreX coreY 1 nearCore 0
+jump 38 equal nearCore false
+ucontrol itemTake core ore oreAmount 0 0
+ucontrol flag 2 0 0 0 0
+jump 8 always x false
+ucontrol approach fX fY 1 0 0
+ucontrol within fX fY 1 nearFactory 0
+jump 44 equal nearFactory false
+ucontrol itemDrop factory1 oreAmount 0 0 0
+ucontrol flag 3 0 0 0 0
+jump 8 always x false

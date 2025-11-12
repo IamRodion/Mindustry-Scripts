@@ -1,0 +1,46 @@
+ubind @mega
+set takeFlag 1
+set dropFlag 2
+set stopFlag 3
+sensor rX reconstructor1 @x
+sensor rY reconstructor1 @y
+ulocate building core false @copper coreX coreY coreFound core
+ucontrol flag stopFlag 0 0 0 0
+sensor unitFlag @unit @flag
+sensor siliconAmount reconstructor1 @silicon
+op sub siliconAmountNeed 40 siliconAmount
+sensor graphiteAmount reconstructor1 @graphite
+op sub graphiteAmountNeed 40 graphiteAmount
+select skipSilicon greaterThanEq siliconAmount 40 true false
+select skipGraphite greaterThanEq graphiteAmount 40 true false
+op and skip skipSilicon skipGraphite
+select ore equal skipSilicon true @graphite @silicon
+select ore equal skip true "nothing" ore
+select oreAmount equal ore @silicon siliconAmountNeed graphiteAmountNeed
+select textUnitFlag equal unitFlag 1 "Take" "Idle"
+select textUnitFlag equal unitFlag 2 "Drop" textUnitFlag
+print "[orange]Unit Type:[] {0}\n[green]Unit Mode:[] {1} ({2})\n[red]Factory Need:[] {3} ({4})"
+format @unit
+format textUnitFlag
+format unitFlag
+format ore
+format oreAmount
+printflush message1
+jump 40 equal unitFlag dropFlag
+select newFlag notEqual skip false 3 1
+ucontrol flag newFlag 0 0 0 0
+jump 34 equal unitFlag takeFlag
+ucontrol stop 0 0 0 0 0
+jump 8 always x false
+ucontrol approach coreX coreY 1 0 0
+ucontrol within coreX coreY 1 nearCore 0
+jump 34 equal nearCore false
+ucontrol itemTake core ore oreAmount 0 0
+ucontrol flag 2 0 0 0 0
+jump 8 always x false
+ucontrol approach rX rY 1 0 0
+ucontrol within rX rY 1 nearReconstructor 0
+jump 40 equal nearReconstructor false
+ucontrol itemDrop reconstructor1 oreAmount 0 0 0
+ucontrol flag 3 0 0 0 0
+jump 8 always x false

@@ -1,0 +1,46 @@
+sensor switch1State switch1 @enabled
+jump 37 notEqual switch1State true
+sensor t1 tank1 @totalLiquids
+sensor t2 tank2 @totalLiquids
+sensor t3 tank3 @totalLiquids
+sensor t4 tank4 @totalLiquids
+sensor t5 tank5 @totalLiquids
+op round t1 t1 b
+write t1 cell1 1
+op round t2 t2 b
+write t2 cell1 2
+op round t3 t3 b
+write t3 cell1 3
+op round t4 t4 b
+write t4 cell1 4
+op round t5 t5 b
+write t5 cell1 5
+op add totalA t1 t2
+op add totalB t3 t4
+op add total totalA totalB
+op add total total t5
+write total cell1 0
+op div percent total 9000
+op mul percent percent 100
+op floor percent percent 100
+sensor switch2State switch2 @enabled
+jump 40 notEqual switch2State false
+draw clear 87 103 175 0 0 0
+print "T1: {0}\nT2: {1}\nT3: {2}\nT4: {3}\nT5: {4}"
+format t1
+format t2
+format t3
+format t4
+format t5
+draw print 40 42 @center 0 0 0
+drawflush display1
+end
+draw clear 92 92 102 0 0 0
+drawflush display1
+end
+draw clear 87 103 175 0 0 0
+print "Total: {0}%\nNow: {1}\nMax: 9000"
+format percent
+format total
+draw print 40 42 @center 0 0 0
+drawflush display1
