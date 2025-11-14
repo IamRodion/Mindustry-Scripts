@@ -73,7 +73,7 @@ ucontrol flag newFlag 0 0 0 0
 jump 56 equal unitFlag takeFlag
 # Sí no se cumplen ninguna de las condiciones anteriores, se detiene la unidad y se salta al inicio
 ucontrol stop 0 0 0 0 0
-jump 9 always x false
+jump 9 always
 # Obtener recursos
 ucontrol approach coreX coreY 1 0 0
 ucontrol within coreX coreY 1 nearCore 0
@@ -81,11 +81,11 @@ jump 56 equal nearCore false
 ucontrol itemDrop core 999
 ucontrol itemTake core ore oreAmount 0 0
 ucontrol flag dropFlag 0 0 0 0
-jump 9 always x false
+jump 9 always
 # Dejar recursos
 ucontrol approach fX fY 1 0 0
 ucontrol within fX fY 1 nearFactory 0
 jump 63 equal nearFactory false
 ucontrol itemDrop factory1 oreAmount 0 0 0
 ucontrol flag stopFlag 0 0 0 0
-jump 9 always x false
+jump 9 always
