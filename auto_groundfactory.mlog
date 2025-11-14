@@ -13,7 +13,7 @@ jump 0 equal coreFound false
 # Inicializa la bandera de la unidad en estado "stop"
 ucontrol flag stopFlag 0 0 0 0
 # Lee el estado actual de la unidad
-sensor unitFlag @unit @flag
+sensor unitFlag @unit @flag #9
 # Lee la configuración de la fábrica (el tipo de unidad a fabricar)
 sensor factoryConfig factory1 @config
 # Define las cantidades necesarias de recursos según el tipo de unidad a fabricar teniendo como prioridad el silicio
@@ -75,7 +75,7 @@ jump 56 equal unitFlag takeFlag
 ucontrol stop 0 0 0 0 0
 jump 9 always
 # Obtener recursos
-ucontrol approach coreX coreY 1 0 0
+ucontrol approach coreX coreY 1 0 0 #56
 ucontrol within coreX coreY 1 nearCore 0
 jump 56 equal nearCore false
 ucontrol itemDrop core 999
@@ -83,7 +83,7 @@ ucontrol itemTake core ore oreAmount 0 0
 ucontrol flag dropFlag 0 0 0 0
 jump 9 always
 # Dejar recursos
-ucontrol approach fX fY 1 0 0
+ucontrol approach fX fY 1 0 0 #63
 ucontrol within fX fY 1 nearFactory 0
 jump 63 equal nearFactory false
 ucontrol itemDrop factory1 oreAmount 0 0 0
