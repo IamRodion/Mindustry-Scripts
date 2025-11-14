@@ -5,8 +5,8 @@ set takeFlag 841
 set dropFlag 842
 set stopFlag 843
 # Obtiene las coordenadas de la fábrica y del núcleo
-sensor fX factory1 @x
-sensor fY factory1 @y
+sensor fX reconstructor1 @x
+sensor fY reconstructor1 @y
 ulocate building core false @copper coreX coreY coreFound core
 # Sí no se encuentra ningún núcleo se vuelve a intentar enlazar una unidad
 jump 0 equal coreFound false
@@ -64,6 +64,6 @@ jump 9 always
 ucontrol approach fX fY 1 0 0 #43
 ucontrol within fX fY 1 nearFactory 0
 jump 43 equal nearFactory false
-ucontrol itemDrop factory1 oreAmount 0 0 0
+ucontrol itemDrop reconstructor1 oreAmount 0 0 0
 ucontrol flag stopFlag 0 0 0 0
 jump 9 always
