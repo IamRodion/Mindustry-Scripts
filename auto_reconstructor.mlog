@@ -1,46 +1,69 @@
-ubind @mega
-set takeFlag 1
-set dropFlag 2
-set stopFlag 3
-sensor rX reconstructor1 @x
-sensor rY reconstructor1 @y
+# Enlaza una unidad de tipo "mono" para trabajar con la fábrica
+ubind @mono
+# Crea variables para los estados de la unidad trabajadora. 84X significa "reconstructor (T2) factory" y "X" es el estado.
+set takeFlag 841
+set dropFlag 842
+set stopFlag 843
+# Obtiene las coordenadas de la fábrica y del núcleo
+sensor fX factory1 @x
+sensor fY factory1 @y
 ulocate building core false @copper coreX coreY coreFound core
+# Sí no se encuentra ningún núcleo se vuelve a intentar enlazar una unidad
+jump 0 equal coreFound false
+# Inicializa la bandera de la unidad en estado "stop"
 ucontrol flag stopFlag 0 0 0 0
-sensor unitFlag @unit @flag
-sensor siliconAmount reconstructor1 @silicon
-op sub siliconAmountNeed 40 siliconAmount
+# Lee el estado actual de la unidad
+sensor unitFlag @unit @flag #9
+# Detecta las cantidades actuales de recursos en la fábrica y las almacena en variables
 sensor graphiteAmount reconstructor1 @graphite
+sensor siliconAmount reconstructor1 @silicon
+# Calcula las cantidades de recursos que faltan para fabricar la unidad deseada
 op sub graphiteAmountNeed 40 graphiteAmount
-select skipSilicon greaterThanEq siliconAmount 40 true false
+op sub siliconAmountNeed 40 siliconAmount
+# Calcula sí se deben omitir ciertos recursos si ya hay suficientes en la fábrica
 select skipGraphite greaterThanEq graphiteAmount 40 true false
-op and skip skipSilicon skipGraphite
-select ore equal skipSilicon true @graphite @silicon
-select ore equal skip true "nothing" ore
-select oreAmount equal ore @silicon siliconAmountNeed graphiteAmountNeed
-select textUnitFlag equal unitFlag 1 "Take" "Idle"
-select textUnitFlag equal unitFlag 2 "Drop" textUnitFlag
-print "[orange]Unit Type:[] {0}\n[green]Unit Mode:[] {1} ({2})\n[red]Factory Need:[] {3} ({4})"
+select skipSilicon greaterThanEq siliconAmount 40 true false
+# Si todos los recursos son suficientes, se establece la variable "skip" en true
+op and skip skipGraphite skipSilicon
+# Establece el ore necesario en la variable "ore" y sí no se necesita nada, la establece en "nothing" de color verde, teniendo el silicio como prioridad
+select ore equal skipGraphite true "[green]nothing[]" @graphite
+select ore equal skipSilicon true ore @silicon
+# Establece la cantidad de ore necesaria en la variable "oreAmount" teniendo en cuenta el ore establecido en la variable "ore". Si no se necesita nada, la cantidad será 0.
+select oreAmount equal ore @graphite graphiteAmountNeed 0
+select oreAmount equal ore @silicon siliconAmountNeed oreAmount
+# Establece un texto que representa el estado actual de la unidad basado en la variable "unitFlag"
+select textUnitFlag equal unitFlag 841 "[red]Take[]" "[green]Idle[]"
+select textUnitFlag equal unitFlag 842 "[yellow]Drop[]" textUnitFlag
+# Muestra un mensaje con el tipo de unidad trabajadora, su estado actual, la configuración de la fábrica, el recurso necesario y la cantidad necesaria
+print "[grey]Unit Type:[] {0}\n[grey]Unit Mode:[] {1} ({2})\n[grey]Factory Need:[] [red]{3}[] ({4})"
 format @unit
 format textUnitFlag
 format unitFlag
 format ore
 format oreAmount
 printflush message1
-jump 40 equal unitFlag dropFlag
-select newFlag notEqual skip false 3 1
+# Sí el estado de la unidad es "drop", salta a la sección de "dejar recursos"
+jump 43 equal unitFlag dropFlag
+# Sí no se necesitan recursos, se establece el estado de la unidad en "stop", de lo contrario se establece en "take"
+select newFlag equal skip true stopFlag takeFlag
 ucontrol flag newFlag 0 0 0 0
-jump 34 equal unitFlag takeFlag
+# Sí el estado de la unidad es "take", salta a la sección "obtener recursos"
+jump 36 equal unitFlag takeFlag
+# Sí no se cumplen ninguna de las condiciones anteriores, se detiene la unidad y se salta al inicio
 ucontrol stop 0 0 0 0 0
-jump 8 always x false
-ucontrol approach coreX coreY 1 0 0
+jump 9 always
+# Obtener recursos
+ucontrol approach coreX coreY 1 0 0 #36
 ucontrol within coreX coreY 1 nearCore 0
-jump 34 equal nearCore false
+jump 36 equal nearCore false
+ucontrol itemDrop core 999
 ucontrol itemTake core ore oreAmount 0 0
-ucontrol flag 2 0 0 0 0
-jump 8 always x false
-ucontrol approach rX rY 1 0 0
-ucontrol within rX rY 1 nearReconstructor 0
-jump 40 equal nearReconstructor false
-ucontrol itemDrop reconstructor1 oreAmount 0 0 0
-ucontrol flag 3 0 0 0 0
-jump 8 always x false
+ucontrol flag dropFlag 0 0 0 0
+jump 9 always
+# Dejar recursos
+ucontrol approach fX fY 1 0 0 #43
+ucontrol within fX fY 1 nearFactory 0
+jump 43 equal nearFactory false
+ucontrol itemDrop factory1 oreAmount 0 0 0
+ucontrol flag stopFlag 0 0 0 0
+jump 9 always
